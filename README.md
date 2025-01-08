@@ -1,7 +1,7 @@
 # Założenia
 
 1. Każdy klient może mieć wiele kart rówżnych wystawców.
-2. Każdy wystawca może mieć wiele kleintów.
+2. Każdy wystawca może mieć wiele klientów.
 3. Jeden jeden klient może mieć tylko jedną kartę od danego wystawcy
 4. Każda karta ma wartość, która zmniejsza się po każdym użyciu.
 5. Gdy karta ma osiąga wartość 0 staje się nie ważna.
@@ -13,9 +13,9 @@
 
 Jako użytkownik, chcę widzieć swoje karty
 ```sql
-SELECT card_id, issuer_email, status
+SELECT owner_email, issuer_email, status
 FROM card_by_owner_email_and_issuer_email
-WHERE owner_email = ?;
+WHERE owner_email = ? AND issuer_email = ?;
 ```
 
 Oraz sprawdzić ich wartości
@@ -29,9 +29,9 @@ WHERE owner_email = ? AND issuer_email = ?;
 
 Jako wystawca, chcę widzieć karty wystawione
 ```sql
-SELECT card_id, owner_email, status
+SELECT issuer_email, owner_email, status
 FROM card_by_owner_email_and_issuer_email
-WHERE issuer_email = ? AND owner_email = ?;
+WHERE owner_email = ? AND issuer_email = ?;
 ```
 
 ## Zarządzanie kartą 
