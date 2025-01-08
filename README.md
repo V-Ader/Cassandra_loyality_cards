@@ -1,24 +1,24 @@
 # Założenia
 
-1. Każdy klient może mieć wiele kart rówżnych wystawców.
+1. Każdy klient może mieć wiele kart różnych wystawców.
 2. Każdy wystawca może mieć wiele klientów.
-3. Jeden jeden klient może mieć tylko jedną kartę od danego wystawcy
+3. Jeden jeden klient może mieć tylko jedną kartę od danego wystawcy.
 4. Każda karta ma wartość, która zmniejsza się po każdym użyciu.
-5. Gdy karta ma osiąga wartość 0 staje się nie ważna.
+5. Gdy karta ma osiągnąć wartość 0 staje się nie ważna.
 
 
 # Przykładowe zapytania
 
 ## Użytkownik
 
-Jako użytkownik, chcę widzieć swoje karty
+Jako użytkownik, chcę widzieć swoje karty:
 ```sql
 SELECT owner_email, issuer_email, status
 FROM card_by_owner_email_and_issuer_email
 WHERE owner_email = ? AND issuer_email = ?;
 ```
 
-Oraz sprawdzić ich wartości
+Oraz sprawdzić ich wartości:
 ```sql
 SELECT tokens
 FROM tokens_by_owner_email_and_issuer_email
@@ -27,7 +27,7 @@ WHERE owner_email = ? AND issuer_email = ?;
 
 ## Wystawca
 
-Jako wystawca, chcę widzieć karty wystawione
+Jako wystawca, chcę widzieć karty wystawione:
 ```sql
 SELECT issuer_email, owner_email, status
 FROM card_by_owner_email_and_issuer_email
@@ -36,7 +36,7 @@ WHERE owner_email = ? AND issuer_email = ?;
 
 ## Zarządzanie kartą 
 
-wartość katry można sprawdzić zapytaniem
+Wartość katry można sprawdzić zapytaniem:
 ```sql
 SELECT tokens
 FROM tokens_by_owner_email_and_issuer_email
@@ -80,10 +80,10 @@ Założenia:
 - poprawność ważniejsza niż czas odpowiedzi
 
 Zasada działania WATCHERA:
-1. Pobierz wszystkei liczniki, których wartość jest <= 0. 
-2. Dla kart, których wartość = 0 -> ustaw status na 'inactive'
-3. Dla kart, których wartość jest  < 0 -> ustaw status na 'invalid'
+1. Pobierz wszystkie liczniki, których wartość jest <= 0. 
+2. Dla kart, których wartość = 0 -> ustaw status na 'inactive'.
+3. Dla kart, których wartość jest  < 0 -> ustaw status na 'invalid'.
 
 Rezultat:
-1. brak race condition -> istnieje 1 WATCHER. W przypadku większej większego zapotrzebowania można ich utworzyć więcej z podziałem na np. wystawców.
-2. ostateczna poprawność wartości statusu kart. Gdy wystawca ostatecznie pobierze swoje wystawione karty, będzie widział, czy jest któraś w stanie invalid i będzie mógł podjąć decyzję biznesową.
+1. Brak race condition -> istnieje 1 WATCHER. W przypadku większej większego zapotrzebowania można ich utworzyć więcej z podziałem na np. wystawców.
+2. Ostateczna poprawność wartości statusu kart. Gdy wystawca ostatecznie pobierze swoje wystawione karty, będzie widział, czy jest któraś w stanie invalid i będzie mógł podjąć decyzję biznesową.
