@@ -1,0 +1,61 @@
+version: '3.8'
+services:
+  cassandra-node1:
+    image: cassandra:4.0
+    container_name: cassandra-node1
+    hostname: cassandra-node1
+    environment:
+      - CASSANDRA_CLUSTER_NAME=LoyaltyCluster
+      - CASSANDRA_LISTEN_ADDRESS=cassandra-node1
+      - CASSANDRA_SEEDS=cassandra-node1
+      - CASSANDRA_BROADCAST_ADDRESS=cassandra-node1
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+    networks:
+      cassandra-net:
+        ipv4_address: 172.20.0.2
+    ports:
+      - "9042:9042"
+    # volumes:
+    #   - ./init.cql:/init.cql
+    # command: >
+    #   bash -c "exec cassandra -R &&
+    #            until cqlsh -f /init.cql; do echo 'Creating db...'; sleep 5; done"
+
+  cassandra-node2:
+    image: cassandra:4.0
+    container_name: cassandra-node2
+    hostname: cassandra-node2
+    environment:
+      - CASSANDRA_CLUSTER_NAME=LoyaltyCluster
+      - CASSANDRA_LISTEN_ADDRESS=cassandra-node2
+      - CASSANDRA_SEEDS=cassandra-node1
+      - CASSANDRA_BROADCAST_ADDRESS=cassandra-node2
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+    networks:
+      cassandra-net:
+        ipv4_address: 172.20.0.3
+    ports:
+      - "9043:9042"
+
+  cassandra-node3:
+    image: cassandra:4.0
+    container_name: cassandra-node3
+    hostname: cassandra-node3
+    environment:
+      - CASSANDRA_CLUSTER_NAME=LoyaltyCluster
+      - CASSANDRA_LISTEN_ADDRESS=cassandra-node3
+      - CASSANDRA_SEEDS=cassandra-node1
+      - CASSANDRA_BROADCAST_ADDRESS=cassandra-node3
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+    networks:
+      cassandra-net:
+        ipv4_address: 172.20.0.4
+    ports:
+      - "9044:9042"
+
+networks:
+  cassandra-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
