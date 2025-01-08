@@ -85,9 +85,9 @@ Założenia:
 
 Zasada działania WATCHERA:
 1. Pobierz wszystkie liczniki, których wartość jest <= 0. 
-2. Dla kart, których wartość = 0 -> ustaw status na 'inactive'.
-3. Dla kart, których wartość jest  < 0 -> ustaw status na 'invalid'.
+2. Dla kart, których wartość równa 0 -> ustaw status odpowiadającej karty na 'inactive'.
+3. Dla kart, których wartość jest mniejsza niż 0 -> ustaw status odpowiadającej karty na 'invalid'.
 
 Rezultat:
-1. Brak race condition -> istnieje 1 WATCHER. W przypadku większej większego zapotrzebowania można ich utworzyć więcej z podziałem na np. wystawców.
-2. Ostateczna poprawność wartości statusu kart. Gdy wystawca ostatecznie pobierze swoje wystawione karty, będzie widział, czy jest któraś w stanie invalid i będzie mógł podjąć decyzję biznesową.
+1. Brak race condition -> istnieje 1 WATCHER. W przypadku większego zapotrzebowania można ich utworzyć więcej z podziałem na np. wystawców.
+2. Ostateczna poprawność wartości statusu kart. Gdy wystawca ostatecznie pobierze swoje wystawione karty, będzie widział, czy jest któraś w stanie invalid i będzie mógł podjąć decyzję biznesową wobec danego klienta.
