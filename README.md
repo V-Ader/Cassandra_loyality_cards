@@ -1,3 +1,7 @@
+# Cassandra - Loyality cards
+-----
+
+
 # Założenia
 
 1. Każdy klient może mieć wiele kart różnych wystawców.
