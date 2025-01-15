@@ -10,5 +10,10 @@ public class Main {
             throw new RuntimeException(e);
         }
         System.out.println("Client connected!");
+
+
+        session.closeConnection();
+        System.out.println("Client disconnected!");
+
     }
 }

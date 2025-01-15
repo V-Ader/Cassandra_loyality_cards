@@ -3,12 +3,11 @@ package database.config;
 import database.ConnectionException;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 public class CassandraConfigService {
 
     private CassandraConfig config;
-    private static volatile CassandraConfigService instance;
+    private static CassandraConfigService instance;
 
     private CassandraConfigService() throws IOException {
         this.config = CassandraConfigReader.getConfig();

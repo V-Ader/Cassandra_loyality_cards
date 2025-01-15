@@ -18,13 +18,28 @@ public class CassandraConfigReader {
         }
 
         return CassandraConfig.builder()
-                .port(Integer.getInteger(properties.getProperty("cassandra.port")))
+                .keyspace(properties.getProperty("cassandra.keyspace"))
                 .addresses(extractAddresses(properties.getProperty("cassandra.nodes")))
                 .build();
     }
 
-    static List<String> extractAddresses(String configValue) {
-        return new ArrayList<>(Arrays.asList(configValue.split(",")));
+    static List<Address> extractAddresses(String configValue) {
+        List<String> nodes = Arrays.asList(configValue.split(","));
+
+        List<Address> addresses = new ArrayList<>();
+
+        for (String node : nodes) {
+            String[] parts = node.split(":");
+            if (parts.length == 2) {
+                String address = parts[0].trim();
+                Integer port = Integer.parseInt(parts[1].trim());
+                addresses.add(new Address(port, address));
+            } else {
+                throw new IllegalArgumentException("Invalid address format: " + node);
+            }
+        }
+
+        return addresses;
     }
 
     private CassandraConfigReader() {}
