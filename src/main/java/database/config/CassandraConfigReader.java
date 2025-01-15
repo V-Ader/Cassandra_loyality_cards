@@ -3,6 +3,7 @@ package database.config;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -23,16 +24,7 @@ public class CassandraConfigReader {
     }
 
     static List<String> extractAddresses(String configValue) {
-        List<String> nodeList = new ArrayList<>();
-        for (String node : configValue.split(",")) {
-            String[] parts = node.split(":");
-            if (parts.length != 2) {
-                throw new IllegalArgumentException("Invalid node format: " + node);
-            }
-            String host = parts[0].trim();
-            nodeList.add(host);
-        }
-        return nodeList;
+        return new ArrayList<>(Arrays.asList(configValue.split(",")));
     }
 
     private CassandraConfigReader() {}
