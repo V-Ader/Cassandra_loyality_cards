@@ -1,4 +1,4 @@
-package database.config;
+package loyalty.database.config;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

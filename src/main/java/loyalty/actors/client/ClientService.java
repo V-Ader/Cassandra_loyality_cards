@@ -1,9 +1,9 @@
-package actors.client;
+package loyalty.actors.client;
 
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
-import models.Card;
+import loyalty.models.Card;
 
 import java.util.ArrayList;
 import java.util.List;

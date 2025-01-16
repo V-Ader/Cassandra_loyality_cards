@@ -1,19 +1,17 @@
-package database.connector;
+package loyalty.database.connector;
 
 import com.datastax.driver.core.Cluster;
-import database.CassandraConnection;
-import database.ConnectionException;
-import database.config.Address;
-import database.config.CassandraConfig;
-import database.config.CassandraConfigReader;
-import database.config.CassandraConfigService;
+import loyalty.database.CassandraConnection;
+import loyalty.database.ConnectionException;
+import loyalty.database.config.Address;
+import loyalty.database.config.CassandraConfig;
+import loyalty.database.config.CassandraConfigReader;
 
 import java.io.IOException;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class CassandraRandomConnector {
 
-    private static CassandraRandomConnector instance;
     private CassandraConfig config;
 
     private CassandraRandomConnector() throws IOException {
@@ -21,15 +19,20 @@ public class CassandraRandomConnector {
     }
 
 
-    public static CassandraRandomConnector getInstance() throws IOException {
-        if (instance == null) {
-            synchronized (CassandraConfigService.class) {
-                if (instance == null) {
-                    instance = new CassandraRandomConnector();
-                }
+    private static final class InstanceHolder {
+        private static final CassandraRandomConnector instance;
+
+        static {
+            try {
+                instance = new CassandraRandomConnector();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
         }
-        return instance;
+    }
+
+    public static CassandraRandomConnector getInstance() {
+        return InstanceHolder.instance;
     }
 
 

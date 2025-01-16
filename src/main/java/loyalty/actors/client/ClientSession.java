@@ -1,15 +1,14 @@
-package actors.client;
+package loyalty.actors.client;
 
-import com.datastax.driver.core.Session;
-import database.CassandraConnection;
-import database.connector.CassandraRandomConnector;
-import database.ConnectionException;
+import loyalty.database.CassandraConnection;
+import loyalty.database.connector.CassandraRandomConnector;
+import loyalty.database.ConnectionException;
 
 public class ClientSession {
 
     private final CassandraConnection connection;
 
-    private ClientService clientService;
+    private final ClientService clientService;
 
     public ClientSession() throws ConnectionException {
         CassandraRandomConnector connector;

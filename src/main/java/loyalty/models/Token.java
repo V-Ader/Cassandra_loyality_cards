@@ -1,4 +1,4 @@
-package models;
+package loyalty.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

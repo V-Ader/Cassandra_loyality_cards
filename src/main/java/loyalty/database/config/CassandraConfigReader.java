@@ -1,4 +1,4 @@
-package database.config;
+package loyalty.database.config;
 
 import java.io.FileInputStream;
 import java.io.IOException;

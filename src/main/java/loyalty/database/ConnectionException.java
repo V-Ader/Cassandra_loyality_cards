@@ -1,4 +1,4 @@
-package database;
+package loyalty.database;
 
 public class ConnectionException extends Exception {
     public ConnectionException(String message) {

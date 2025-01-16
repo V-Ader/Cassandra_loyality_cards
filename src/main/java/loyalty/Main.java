@@ -1,5 +1,7 @@
-import actors.client.ClientSession;
-import database.ConnectionException;
+package loyalty;
+
+import loyalty.actors.client.ClientSession;
+import loyalty.database.ConnectionException;
 
 public class Main {
     public static void main(String[] args) {
