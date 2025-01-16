@@ -91,3 +91,15 @@ Zasada działania WATCHERA:
 Rezultat:
 1. Brak race condition -> istnieje 1 WATCHER. W przypadku większego zapotrzebowania można ich utworzyć więcej z podziałem na np. wystawców.
 2. Ostateczna poprawność wartości statusu kart. Gdy wystawca ostatecznie pobierze swoje wystawione karty, będzie widział, czy jest któraś w stanie invalid i będzie mógł podjąć decyzję biznesową wobec danego klienta.
+
+# Testowanie rozwiązania
+
+W celu przetestowania można wykorzystać plik init_db.sh.
+
+```bash
+docker cp init_db.sh <cassandra_container>:/tmp/init_db.sh
+docker exec -it <cassandra_container> bash
+cd /tmp
+chmod +x init_db.sh
+./init_db.sh
+```
