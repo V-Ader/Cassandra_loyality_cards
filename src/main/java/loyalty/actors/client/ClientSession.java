@@ -10,7 +10,11 @@ public class ClientSession {
 
     private final ClientService clientService;
 
-    public ClientSession() throws ConnectionException {
+    private final String clientEmail;
+
+    private final String issuerEmail;
+
+    public ClientSession(String clientEmail, String issuerEmail) throws ConnectionException {
         CassandraRandomConnector connector;
         try {
             connector = CassandraRandomConnector.getInstance();
@@ -18,10 +22,16 @@ public class ClientSession {
             throw new ConnectionException("Could not establish the connection. Reason:", e);
         }
         this.connection = connector.connect();
+        this.clientEmail = clientEmail;
+        this.issuerEmail = issuerEmail;
 
-        clientService = new ClientService(connection.getSession());
+        clientService = new ClientService(clientEmail, issuerEmail, connection.getSession());
 
-        clientService.selectClients();
+        clientService.selectClientsCards();
+        clientService.selectClientsTokens();
+        clientService.useClientsToken(1);
+        clientService.selectClientsTokens();
+
     }
 
     public void closeConnection() {

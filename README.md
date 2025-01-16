@@ -6,7 +6,7 @@
 
 1. Każdy klient może mieć wiele kart różnych wystawców.
 2. Każdy wystawca może mieć wiele klientów.
-3. Jeden jeden klient może mieć tylko jedną kartę od danego wystawcy.
+3. Jeden klient może mieć tylko jedną kartę od danego wystawcy.
 4. Każda karta ma wartość, która zmniejsza się po każdym użyciu.
 5. Gdy karta ma osiągnąć wartość 0 staje się nie ważna.
 
@@ -94,7 +94,7 @@ Rezultat:
 
 # Testowanie rozwiązania
 
-W celu przetestowania można wykorzystać plik init_db.sh.
+W celu przetestowania można wykorzystać plik `init_db.sh`.
 
 ```bash
 docker cp init_db.sh <cassandra_container>:/tmp/init_db.sh

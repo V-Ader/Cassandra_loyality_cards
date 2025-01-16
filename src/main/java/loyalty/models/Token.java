@@ -13,4 +13,13 @@ public class Token {
     private String ownerEmail;
     private String issuerEmail;
     private long tokens;
+
+    @Override
+    public String toString() {
+        return "Token{" +
+                "issuerEmail='" + issuerEmail + '\'' +
+                ", ownerEmail='" + ownerEmail + '\'' +
+                ", tokens=" + tokens +
+                '}';
+    }
 }
