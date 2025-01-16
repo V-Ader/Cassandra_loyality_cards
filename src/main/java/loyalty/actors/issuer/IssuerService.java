@@ -84,8 +84,31 @@ public class IssuerService {
         return value;
     }
 
-    public void getCard(){
+    public CardDTO getCard(String client_email){
+        String query = "SELECT issuer_email, owner_email, status FROM card_by_owner_email_and_issuer_email WHERE issuer_email = ? AND owner_email = ?";
 
+        PreparedStatement preparedStatement = session.prepare(query);
+        BoundStatement boundStatement = preparedStatement.bind(email, client_email);
+        ResultSet resultSet = session.execute(boundStatement);
+
+        List<CardDTO> cards = new ArrayList<>();
+
+        for (Row row : resultSet) {
+            String issuerEmail = row.getString("issuer_email");
+            String ownerEmail = row.getString("owner_email");
+            String status = row.getString("status");
+
+            CardDTO card = CardDTO.builder()
+                    .issuerEmail(issuerEmail)
+                    .ownerEmail(ownerEmail)
+                    .status(status)
+                    .tokens(getTokenValue(ownerEmail))
+                    .build();
+
+            cards.add(card);
+        }
+
+        return cards.stream().findFirst().orElse(new CardDTO());
     }
 
     public void selectClients(){
