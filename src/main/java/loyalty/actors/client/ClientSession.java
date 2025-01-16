@@ -26,12 +26,14 @@ public class ClientSession {
         this.issuerEmail = issuerEmail;
 
         clientService = new ClientService(clientEmail, issuerEmail, connection.getSession());
+    }
 
-        clientService.selectClientsCards();
-        clientService.selectClientsTokens();
+    public void selectClientsCards(){
         clientService.useClientsToken(1);
-        clientService.selectClientsTokens();
+    }
 
+    public void useToken(){
+        clientService.useClientsToken(1);
     }
 
     public void closeConnection() {

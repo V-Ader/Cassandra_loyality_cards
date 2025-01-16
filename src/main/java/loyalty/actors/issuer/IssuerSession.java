@@ -9,12 +9,10 @@ import java.util.List;
 
 public class IssuerSession {
     private final CassandraConnection connection;
-    private final String email;
 
     private final IssuerService service;
 
     public IssuerSession(String email) throws ConnectionException {
-        this.email = email;
         CassandraRandomConnector connector;
         try {
             connector = CassandraRandomConnector.getInstance();
@@ -49,7 +47,8 @@ public class IssuerSession {
         }
     }
 
-    public void getCard(){
+    public CardDTO getCard(String client){
+        return service.getCard(client);
     }
 
     public void closeConnection() {
