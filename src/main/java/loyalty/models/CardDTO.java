@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CardDTO {
     private String issuerEmail;
-    private String ownerEmail;
+    private String clientEmail;
     private String status;
     private long tokens;
 }

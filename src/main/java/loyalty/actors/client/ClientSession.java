@@ -1,6 +1,8 @@
 package loyalty.actors.client;
 
+import com.datastax.driver.core.*;
 import loyalty.database.CassandraConnection;
+import loyalty.database.connector.CassandraConnectionConfig;
 import loyalty.database.connector.CassandraRandomConnector;
 import loyalty.database.ConnectionException;
 
@@ -10,11 +12,7 @@ public class ClientSession {
 
     private final ClientService clientService;
 
-    private final String clientEmail;
-
-    private final String issuerEmail;
-
-    public ClientSession(String clientEmail, String issuerEmail) throws ConnectionException {
+    public ClientSession(String clientEmail, CassandraConnectionConfig connectionConfig) throws ConnectionException {
         CassandraRandomConnector connector;
         try {
             connector = CassandraRandomConnector.getInstance();
@@ -22,18 +20,15 @@ public class ClientSession {
             throw new ConnectionException("Could not establish the connection. Reason:", e);
         }
         this.connection = connector.connect();
-        this.clientEmail = clientEmail;
-        this.issuerEmail = issuerEmail;
-
-        clientService = new ClientService(clientEmail, issuerEmail, connection.getSession());
+        clientService = new ClientService(clientEmail, connection.getSession(), connectionConfig);
     }
 
-    public void selectClientsCards(){
-        clientService.useClientsToken(1);
+    public ClientSession(String clientEmail) throws ConnectionException {
+        this(clientEmail, CassandraConnectionConfig.getDefaultConfig());
     }
 
-    public void useToken(){
-        clientService.useClientsToken(1);
+    public void useToken(String issuerEmail){
+        clientService.useClientsToken(issuerEmail, 1);
     }
 
     public void closeConnection() {

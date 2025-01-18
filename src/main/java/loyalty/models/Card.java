@@ -12,14 +12,14 @@ import lombok.Setter;
 @AllArgsConstructor
 public class Card {
     private String issuerEmail;
-    private String ownerEmail;
+    private String clientEmail;
     private String status;
 
     @Override
     public String toString() {
         return "Card{" +
                 "issuerEmail='" + issuerEmail + '\'' +
-                ", ownerEmail='" + ownerEmail + '\'' +
+                ", clientEmail='" + clientEmail + '\'' +
                 ", status=" + status +
                 '}';
     }

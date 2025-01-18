@@ -17,25 +17,25 @@
 
 Jako użytkownik, chcę widzieć swoje karty:
 ```sql
-SELECT owner_email, issuer_email, status
-FROM card_by_owner_email_and_issuer_email
-WHERE owner_email = ? AND issuer_email = ?;
+SELECT client_email, issuer_email, status
+FROM card_by_client_email_and_issuer_email
+WHERE client_email = ? AND issuer_email = ?;
 ```
 
 Oraz sprawdzić ich wartości:
 ```sql
 SELECT tokens
-FROM tokens_by_owner_email_and_issuer_email
-WHERE owner_email = ? AND issuer_email = ?;
+FROM tokens_by_issuer_email_and_client_email
+WHERE client_email = ? AND issuer_email = ?;
 ```
 
 ## Wystawca
 
 Jako wystawca, chcę widzieć karty wystawione:
 ```sql
-SELECT issuer_email, owner_email, status
-FROM card_by_owner_email_and_issuer_email
-WHERE owner_email = ? AND issuer_email = ?;
+SELECT issuer_email, client_email, status
+FROM card_by_issuer_email_and_client_email
+WHERE issuer_email = ?;
 ```
 
 ## Zarządzanie kartą 
@@ -43,36 +43,45 @@ WHERE owner_email = ? AND issuer_email = ?;
 Wartość katry można sprawdzić zapytaniem:
 ```sql
 SELECT tokens
-FROM tokens_by_owner_email_and_issuer_email
-WHERE owner_email = ? AND issuer_email = ?;
+FROM tokes_by_issuer_email_and_client_email
+WHERE issuer_email = ? AND client_email = ?;
 ```
 
 Gdy karta jest aktywna, aby jej użyć można wykonać zapytanie:
 ```sql
-UPDATE tokens_by_owner_email_and_issuer_email
+UPDATE tokes_by_issuer_email_and_client_email
 SET tokens = tokens - 1
-WHERE owner_email = ? AND issuer_email = ?;
+WHERE issuer_email = ? AND client_email = ?;
 ```
 
 
 ### Tabele
 
 ```sql
-CREATE TABLE card_by_owner_email_and_issuer_email (
+CREATE TABLE IF NOT EXISTS card_by_issuer_email_and_client_email (
     issuer_email TEXT,
-    owner_email TEXT,
-    status TEXT
-    PRIMARY KEY (issuer_email, owner_email)
+    client_email TEXT,
+    status TEXT,
+    PRIMARY KEY (issuer_email, client_email)
 );
 ```
 
 
 ```sql
-CREATE TABLE tokens_by_owner_email_and_issuer_email (
-    owner_email TEXT,
+CREATE TABLE IF NOT EXISTS card_by_client_email_and_issuer_email (
+    client_email TEXT,
     issuer_email TEXT,
+    status TEXT,
+    PRIMARY KEY (client_email, issuer_email)
+);
+```
+
+```sql
+CREATE TABLE IF NOT EXISTS tokens_by_issuer_email_and_client_email (
+    issuer_email TEXT,
+    client_email TEXT,
     tokens COUNTER,
-    PRIMARY KEY ((owner_email, issuer_email))
+    PRIMARY KEY ((client_email, issuer_email))
 );
 ```
 

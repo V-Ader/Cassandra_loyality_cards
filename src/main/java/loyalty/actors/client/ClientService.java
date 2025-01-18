@@ -6,80 +6,69 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 
-import loyalty.models.Card;
-import loyalty.models.Token;
+import loyalty.database.connector.CassandraConnectionConfig;
+import loyalty.models.CardDTO;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class ClientService {
-    private final String ownerEmail;
-    private final String issuerEmail;
+    private final String clientEmail;
     Session session;
+    CassandraConnectionConfig config;
 
-    public ClientService(String ownerEmail,String issuerEmail, Session session) {
+    public ClientService(String clientEmail, Session session, CassandraConnectionConfig config) {
         this.session = session;
-        this.ownerEmail = ownerEmail;
-        this.issuerEmail = issuerEmail;
+        this.clientEmail = clientEmail;
+        this.config = config;
     }
 
-    public void selectClientsCards(){
-        String query = "SELECT status FROM card_by_owner_email_and_issuer_email WHERE owner_email = ? AND issuer_email = ?;";
+    public List<CardDTO> selectClientsCards(){
+        String query = "SELECT client_email, issuer_email, status FROM card_by_client_email_and_issuer_email WHERE client_email = ?;";
 
         PreparedStatement preparedStatement = session.prepare(query);
-        BoundStatement boundStatement = preparedStatement.bind(ownerEmail, issuerEmail);
+        BoundStatement boundStatement = preparedStatement.bind(clientEmail);
+        boundStatement.setConsistencyLevel(config.getReadConsistency());
         ResultSet resultSet = session.execute(boundStatement);
 
-        List<Card> cards = new ArrayList<>();
+        List<CardDTO> cards = new LinkedList<>();
 
         for (Row row : resultSet) {
-            String status = row.getString("status");
-
-            Card card = Card.builder()
-                    .issuerEmail(issuerEmail)
-                    .ownerEmail(ownerEmail)
-                    .status(status)
+            CardDTO cardDTO = CardDTO.builder()
+                    .clientEmail(row.getString("client_email"))
+                    .issuerEmail(row.getString("issuer_email"))
+                    .status(row.getString("status"))
+                    .tokens(getTokenValue(row.getString("issuer_email")))
                     .build();
 
-            cards.add(card);
+            cards.add(cardDTO);
         }
-
-        for (Card card : cards) {
-            System.out.println(card);
-        }
+        return cards;
     }
 
-    public void selectClientsTokens(){
-        String query = "SELECT tokens FROM tokens_by_owner_email_and_issuer_email WHERE owner_email = ? AND issuer_email = ?;";
+    private long getTokenValue(String issuerEmail) {
+        String query = "SELECT tokens FROM tokens_by_issuer_email_and_client_email WHERE issuer_email = ? AND client_email = ?";
 
         PreparedStatement preparedStatement = session.prepare(query);
-        BoundStatement boundStatement = preparedStatement.bind(ownerEmail, issuerEmail);
+        BoundStatement boundStatement = preparedStatement.bind(clientEmail, issuerEmail);
+        boundStatement.setConsistencyLevel(config.getReadConsistency());
         ResultSet resultSet = session.execute(boundStatement);
 
-        List<Token> tokens = new ArrayList<>();
+        long value = 0;
 
         for (Row row : resultSet) {
-            long tokens_value = row.getLong("tokens");
-
-            Token token = Token.builder()
-                    .issuerEmail(issuerEmail)
-                    .ownerEmail(ownerEmail)
-                    .tokens(tokens_value)
-                    .build();
-
-            tokens.add(token);
+            value = row.getLong("tokens");
         }
 
-        for (Token token : tokens) {
-            System.out.println(token);
-        }
+        return value;
     }
 
-    public void useClientsToken(long value){
-        String query = "UPDATE tokens_by_owner_email_and_issuer_email SET tokens = tokens - ? WHERE owner_email = ? AND issuer_email = ?;";
+    public void useClientsToken(String issuerEmail, long value){
+        String query = "UPDATE tokens_by_issuer_email_and_client_email SET tokens = tokens - ? WHERE issuer_email = ? AND client_email = ?;";
 
         PreparedStatement preparedStatement = session.prepare(query);
-        BoundStatement boundStatement = preparedStatement.bind(value, ownerEmail, issuerEmail);
-        ResultSet resultSet = session.execute(boundStatement);
+        BoundStatement boundStatement = preparedStatement.bind(value, issuerEmail, clientEmail);
+        boundStatement.setConsistencyLevel(config.getWriteConsistency());
+        session.execute(boundStatement);
     }
 }

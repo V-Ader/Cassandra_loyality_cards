@@ -5,8 +5,8 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) throws InterruptedException {
-        List<String> issuers = EmailGenerator.getEmails("issuer-multiple-2", 2);
-        List<String> clients = EmailGenerator.getEmails("client-multiple-2", 2);
+        List<String> issuers = EmailGenerator.getEmails("issuer-multiple-2", 3);
+        List<String> clients = EmailGenerator.getEmails("client-multiple-2", 3);
 
         List<Thread> threads = new ArrayList<>();
 

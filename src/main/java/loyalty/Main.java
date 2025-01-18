@@ -7,12 +7,12 @@ import loyalty.database.ConnectionException;
 public class Main {
     public static void main(String[] args) {
         ClientSession clientSession;
-        String clientEmail = "owner1@example.com";
+        String clientEmail = "client1@example.com";
         String issuerEmail = "issuer1@example.com";
         IssuerSession issuerSession;
         try {
-            clientSession = new ClientSession(clientEmail, issuerEmail);
-            issuerSession = new IssuerSession("karol@zawislak.pl");
+            clientSession = new ClientSession(clientEmail);
+            issuerSession = new IssuerSession(issuerEmail);
         } catch (ConnectionException e) {
             throw new RuntimeException(e);
         }

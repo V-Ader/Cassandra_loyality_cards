@@ -48,11 +48,11 @@ public class ExampleTest {
     private static void useCard(String client, String issuer) {
         ClientSession session;
         try {
-            session = new ClientSession(client, issuer);
+            session = new ClientSession(client);
         } catch (ConnectionException e) {
             throw new RuntimeException("Failed to consume token for client: " + client, e);
         }
-        session.useToken();
+        session.useToken(issuer);
         session.closeConnection();
     }
 

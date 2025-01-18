@@ -10,7 +10,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class Token {
-    private String ownerEmail;
+    private String clientEmail;
     private String issuerEmail;
     private long tokens;
 
@@ -18,7 +18,7 @@ public class Token {
     public String toString() {
         return "Token{" +
                 "issuerEmail='" + issuerEmail + '\'' +
-                ", ownerEmail='" + ownerEmail + '\'' +
+                ", clientEmail='" + clientEmail + '\'' +
                 ", tokens=" + tokens +
                 '}';
     }
