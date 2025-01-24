@@ -1,7 +1,7 @@
 package loyalty.database;
 
-import com.datastax.driver.core.Cluster;
-import com.datastax.driver.core.Session;
+
+import com.datastax.oss.driver.api.core.session.Session;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,11 +10,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CassandraConnection {
-    private Cluster cluster;
     private Session session;
 
     public void close() {
         session.close();
-        cluster.close();
     }
 }

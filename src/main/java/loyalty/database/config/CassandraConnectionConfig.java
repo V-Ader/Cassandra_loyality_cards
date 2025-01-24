@@ -1,6 +1,6 @@
 package loyalty.database.config;
 
-import com.datastax.driver.core.ConsistencyLevel;
+import com.datastax.oss.driver.api.core.ConsistencyLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;

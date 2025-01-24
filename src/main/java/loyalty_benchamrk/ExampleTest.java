@@ -1,15 +1,21 @@
 package loyalty_benchamrk;
 
-import com.datastax.driver.core.ConsistencyLevel;
-import loyalty.actors.client.ClientSession;
-import loyalty.actors.issuer.IssuerSession;
-import loyalty.database.ConnectionException;
+import com.datastax.oss.driver.api.core.CqlSession;
+import loyalty.actors.client.ClientService;
+import loyalty.actors.issuer.IssuerService;
 import loyalty.database.config.CassandraConnectionConfig;
 import loyalty.models.CardDTO;
 
 
 public class ExampleTest {
-    static boolean run(String issuer, String client) {
+
+    CqlSession session;
+
+    ExampleTest(CqlSession session) {
+        this.session = session;
+    }
+
+    boolean run(String issuer, String client) {
         int calls = 10;
         long tokens = 10;
         long expectedValue = 0;
@@ -21,40 +27,19 @@ public class ExampleTest {
         return card.getTokens() == expectedValue;
     }
 
-    private static IssuerSession createIssuerSession(String issuer) {
-        try {
-            return new IssuerSession(issuer, CassandraConnectionConfig.getConsistencyOne());
-        } catch (ConnectionException e) {
-            throw new RuntimeException("Failed to create issuer session for: " + issuer, e);
-        }
+
+    private CardDTO getCard(String client, String issuer) {
+        IssuerService service = new IssuerService(issuer, session, CassandraConnectionConfig.getConsistencyOne());
+        return service.getCard(client);
     }
 
-    private static CardDTO getCard(String client, String issuer) {
-        IssuerSession issuerSession = createIssuerSession(issuer);
-
-        CardDTO card = issuerSession.getCard(client);
-        issuerSession.closeConnection();
-        return card;
+    private void createCard(String client, String issuer, long tokens) {
+        IssuerService service = new IssuerService(issuer, session, CassandraConnectionConfig.getDefault());
+        service.createCard(client,tokens);
     }
 
-    private static void createCard(String client, String issuer, long tokens) {
-        IssuerSession issuerSession = createIssuerSession(issuer);
-        issuerSession.createCard(client,tokens);
-        issuerSession.closeConnection();
+    private void useCard(String client, String issuer) {
+        ClientService service = new ClientService(client, session, CassandraConnectionConfig.getConsistencyOne());
+        service.useClientsToken(issuer, 1);
     }
-
-    private static void useCard(String client, String issuer) {
-        ClientSession session;
-        try {
-            session = new ClientSession(
-                    client,
-                    issuer);
-        } catch (ConnectionException e) {
-            throw new RuntimeException("Failed to consume token for client: " + client, e);
-        }
-        session.useToken();
-        session.closeConnection();
-    }
-
-    private ExampleTest() {}
 }

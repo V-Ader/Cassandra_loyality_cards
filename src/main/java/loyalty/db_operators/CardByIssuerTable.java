@@ -1,6 +1,10 @@
 package loyalty.db_operators;
 
-import com.datastax.driver.core.*;
+import com.datastax.oss.driver.api.core.CqlSession;
+import com.datastax.oss.driver.api.core.cql.BoundStatement;
+import com.datastax.oss.driver.api.core.cql.PreparedStatement;
+import com.datastax.oss.driver.api.core.cql.ResultSet;
+import com.datastax.oss.driver.api.core.cql.Row;
 import loyalty.database.config.CassandraConnectionConfig;
 import loyalty.models.CardDTO;
 
@@ -9,11 +13,12 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class CardByIssuerTable {
-    public static List<CardDTO> getCards(Session session, CassandraConnectionConfig config, String issuer){
+    public static List<CardDTO> getCards(CqlSession session, CassandraConnectionConfig config, String issuer){
         String query = "SELECT client_email, issuer_email, status FROM card_by_issuer_email_and_client_email WHERE issuer_email = ?;";
 
-        PreparedStatement preparedStatement = session.prepare(query).setConsistencyLevel(config.getReadConsistency());
+        PreparedStatement preparedStatement = session.prepare(query);
         BoundStatement boundStatement = preparedStatement.bind(issuer);
+        boundStatement.setConsistencyLevel(config.getReadConsistency());
         ResultSet resultSet = session.execute(boundStatement);
 
         List<CardDTO> cards = new LinkedList<>();
@@ -30,18 +35,19 @@ public class CardByIssuerTable {
         return cards;
     }
 
-    public static CardDTO getCard(Session session, CassandraConnectionConfig config, String issuer, String client){
-        String query = "SELECT issuer_email, owner_email, status FROM card_by_owner_email_and_issuer_email WHERE issuer_email = ? AND owner_email = ?";
+    public static CardDTO getCard(CqlSession session, CassandraConnectionConfig config, String issuer, String client){
+        String query = "SELECT issuer_email, client_email, status FROM card_by_issuer_email_and_client_email WHERE issuer_email = ? AND client_email = ?";
 
-        PreparedStatement preparedStatement = session.prepare(query).setConsistencyLevel(config.getReadConsistency());
+        PreparedStatement preparedStatement = session.prepare(query);
         BoundStatement boundStatement = preparedStatement.bind(issuer, client);
+        boundStatement.setConsistencyLevel(config.getReadConsistency());
         ResultSet resultSet = session.execute(boundStatement);
 
             List<CardDTO> cards = new ArrayList<>();
 
             for (Row row : resultSet) {
                 String issuerEmail = row.getString("issuer_email");
-                String clientEmail = row.getString("owner_email");
+                String clientEmail = row.getString("client_email");
                 String status = row.getString("status");
 
                 CardDTO card = CardDTO.builder()
@@ -56,7 +62,7 @@ public class CardByIssuerTable {
         return cards.stream().findFirst().orElse(new CardDTO());
     }
 
-    public static void createCard(Session session, CassandraConnectionConfig config, String issuer, String client) {
+    public static void createCard(CqlSession session, CassandraConnectionConfig config, String issuer, String client) {
         String query = "INSERT INTO card_by_issuer_email_and_client_email (client_email, issuer_email, status) VALUES (?, ?, ?)";
         String status = "active";
 
@@ -66,10 +72,11 @@ public class CardByIssuerTable {
         session.execute(boundStatement);
     }
 
-    public static void setStatus(Session session, CassandraConnectionConfig config, String issuer, String client, String newStatus) {
+    public static void setStatus(CqlSession session, CassandraConnectionConfig config, String issuer, String client, String newStatus) {
         String query = "UPDATE card_by_issuer_email_and_client_email SET status = ? WHERE issuer_email = ? AND client_email = ?";
-        PreparedStatement preparedStatement = session.prepare(query).setConsistencyLevel(config.getReadConsistency());
+        PreparedStatement preparedStatement = session.prepare(query);
         BoundStatement boundStatement = preparedStatement.bind(newStatus, issuer, client);
+        boundStatement.setConsistencyLevel(config.getReadConsistency());
         session.execute(boundStatement);
     }
 

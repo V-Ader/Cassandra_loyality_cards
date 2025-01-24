@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS card_by_client_email_and_issuer_email (
     PRIMARY KEY (client_email, issuer_email)
 );
 
-CREATE TABLE IF NOT EXISTS tokes_by_issuer_email_and_client_email (
+CREATE TABLE IF NOT EXISTS tokens_by_issuer_email_and_client_email (
     issuer_email TEXT,
     client_email TEXT,
     tokens COUNTER,

@@ -1,6 +1,10 @@
 package loyalty.db_operators;
 
-import com.datastax.driver.core.*;
+import com.datastax.oss.driver.api.core.CqlSession;
+import com.datastax.oss.driver.api.core.cql.BoundStatement;
+import com.datastax.oss.driver.api.core.cql.PreparedStatement;
+import com.datastax.oss.driver.api.core.cql.ResultSet;
+import com.datastax.oss.driver.api.core.cql.Row;
 import loyalty.database.config.CassandraConnectionConfig;
 import loyalty.models.CardDTO;
 
@@ -8,11 +12,12 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class CardByClientTable {
-    public static List<CardDTO> getCards(Session session, CassandraConnectionConfig config, String clientEmail){
+    public static List<CardDTO> getCards(CqlSession session, CassandraConnectionConfig config, String clientEmail){
         String query = "SELECT client_email, issuer_email, status FROM card_by_client_email_and_issuer_email WHERE client_email = ?;";
 
-        PreparedStatement preparedStatement = session.prepare(query).setConsistencyLevel(config.getReadConsistency());
+        PreparedStatement preparedStatement = session.prepare(query);
         BoundStatement boundStatement = preparedStatement.bind(clientEmail);
+        boundStatement.setConsistencyLevel(config.getReadConsistency());
         ResultSet resultSet = session.execute(boundStatement);
 
         List<CardDTO> cards = new LinkedList<>();
@@ -29,7 +34,7 @@ public class CardByClientTable {
         return cards;
     }
 
-    public static void createCard(Session session, CassandraConnectionConfig config, String client, String issuer) {
+    public static void createCard(CqlSession session, CassandraConnectionConfig config, String client, String issuer) {
         String query = "INSERT INTO card_by_client_email_and_issuer_email (client_email, issuer_email, status) VALUES (?, ?, ?)";
         String status = "active";
 
@@ -39,10 +44,11 @@ public class CardByClientTable {
         session.execute(boundStatement);
     }
 
-    public static void setStatus(Session session, CassandraConnectionConfig config, String client, String issuer, String newStatus) {
+    public static void setStatus(CqlSession session, CassandraConnectionConfig config, String client, String issuer, String newStatus) {
         String query = "UPDATE card_by_client_email_and_issuer_email SET status = ? WHERE issuer_email = ? AND client_email = ?";
-        PreparedStatement preparedStatement = session.prepare(query).setConsistencyLevel(config.getReadConsistency());
+        PreparedStatement preparedStatement = session.prepare(query);
         BoundStatement boundStatement = preparedStatement.bind(newStatus, issuer, client);
+        boundStatement.setConsistencyLevel(config.getReadConsistency());
         session.execute(boundStatement);
     }
 

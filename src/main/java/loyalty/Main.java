@@ -1,33 +1,31 @@
 package loyalty;
 
-import loyalty.actors.client.ClientSession;
-import loyalty.actors.issuer.IssuerSession;
+import com.datastax.oss.driver.api.core.CqlSession;
+import loyalty.actors.client.ClientService;
 import loyalty.database.ConnectionException;
+import loyalty.database.connector.CassandraCommonConnector;
 import loyalty.models.CardDTO;
 
 public class Main {
     public static void main(String[] args) {
-        ClientSession clientSession;
-        String clientEmail = "owner1@example.com";
+        String clientEmail = "client1@example.com";
         String issuerEmail = "issuer1@example.com";
-        IssuerSession issuerSession;
+
+        CassandraCommonConnector connector = CassandraCommonConnector.getInstance();
+        CqlSession session;
         try {
-            clientSession = new ClientSession(clientEmail, issuerEmail);
-            issuerSession = new IssuerSession("karol@zawislak.pl");
+            session = connector.connect();
         } catch (ConnectionException e) {
             throw new RuntimeException(e);
         }
-        System.out.println("Client connected!");
 
-        issuerSession.createCard("test2@gmail.com", 20);
-        for(CardDTO card : issuerSession.getAllCards()) {
+        ClientService service = new ClientService(clientEmail, session);
+        for(CardDTO card : service.selectClientsCards()) {
             System.out.println(card.toString());
         }
 
-        clientSession.closeConnection();
-        issuerSession.closeConnection();
+        session.close();
 
-        System.out.println("Client disconnected!");
-
+        return;
     }
 }

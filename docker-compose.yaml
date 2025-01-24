@@ -10,6 +10,7 @@ services:
       - CASSANDRA_SEEDS=cassandra-node1
       - CASSANDRA_BROADCAST_ADDRESS=cassandra-node1
       - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+      - CASSANDRA_DC=datacenter1
     networks:
       cassandra-net:
         ipv4_address: 172.20.0.2
@@ -31,6 +32,7 @@ services:
       - CASSANDRA_SEEDS=cassandra-node1
       - CASSANDRA_BROADCAST_ADDRESS=cassandra-node2
       - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+      - CASSANDRA_DC=datacenter1
     networks:
       cassandra-net:
         ipv4_address: 172.20.0.3
@@ -47,6 +49,7 @@ services:
 #      - CASSANDRA_SEEDS=cassandra-node1
 #      - CASSANDRA_BROADCAST_ADDRESS=cassandra-node3
 #      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+#      - CASSANDRA_DC=datacenter1
 #    networks:
 #      cassandra-net:
 #        ipv4_address: 172.20.0.4

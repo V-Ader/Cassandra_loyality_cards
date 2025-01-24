@@ -1,6 +1,6 @@
 package loyalty.actors.issuer;
 
-import com.datastax.driver.core.*;
+import com.datastax.oss.driver.api.core.CqlSession;
 import loyalty.database.config.CassandraConnectionConfig;
 import loyalty.db_operators.CardByClientTable;
 import loyalty.db_operators.CardByIssuerTable;
@@ -10,11 +10,11 @@ import loyalty.models.CardDTO;
 import java.util.List;
 
 public class IssuerService {
-    Session session;
+    CqlSession session;
     CassandraConnectionConfig config;
     private final String email;
 
-    public IssuerService(String email, Session session, CassandraConnectionConfig config) {
+    public IssuerService(String email, CqlSession session, CassandraConnectionConfig config) {
         this.session = session;
         this.email = email;
         this.config = config;
