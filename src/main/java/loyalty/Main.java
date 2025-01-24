@@ -3,6 +3,7 @@ package loyalty;
 import loyalty.actors.client.ClientSession;
 import loyalty.actors.issuer.IssuerSession;
 import loyalty.database.ConnectionException;
+import loyalty.models.CardDTO;
 
 public class Main {
     public static void main(String[] args) {
@@ -19,7 +20,9 @@ public class Main {
         System.out.println("Client connected!");
 
         issuerSession.createCard("test2@gmail.com", 20);
-        issuerSession.getAllCards();
+        for(CardDTO card : issuerSession.getAllCards()) {
+            System.out.println(card.toString());
+        }
 
         clientSession.closeConnection();
         issuerSession.closeConnection();

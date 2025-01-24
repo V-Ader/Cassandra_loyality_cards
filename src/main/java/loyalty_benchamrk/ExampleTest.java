@@ -1,13 +1,15 @@
 package loyalty_benchamrk;
 
+import com.datastax.driver.core.ConsistencyLevel;
 import loyalty.actors.client.ClientSession;
 import loyalty.actors.issuer.IssuerSession;
 import loyalty.database.ConnectionException;
+import loyalty.database.config.CassandraConnectionConfig;
 import loyalty.models.CardDTO;
 
 
 public class ExampleTest {
-    static void run(String issuer, String client) throws InterruptedException {
+    static boolean run(String issuer, String client) {
         int calls = 10;
         long tokens = 10;
         long expectedValue = 0;
@@ -16,16 +18,12 @@ public class ExampleTest {
         ThreadRunner.runInThreads(() -> useCard(client, issuer), calls);
         CardDTO card = getCard(client, issuer);
 
-        if(card.getTokens() == expectedValue) {
-            System.out.println("passed");
-        } else {
-            System.out.println("failed. Call Watcher");
-        }
+        return card.getTokens() == expectedValue;
     }
 
     private static IssuerSession createIssuerSession(String issuer) {
         try {
-            return new IssuerSession(issuer);
+            return new IssuerSession(issuer, CassandraConnectionConfig.getConsistencyOne());
         } catch (ConnectionException e) {
             throw new RuntimeException("Failed to create issuer session for: " + issuer, e);
         }
@@ -48,7 +46,9 @@ public class ExampleTest {
     private static void useCard(String client, String issuer) {
         ClientSession session;
         try {
-            session = new ClientSession(client, issuer);
+            session = new ClientSession(
+                    client,
+                    issuer);
         } catch (ConnectionException e) {
             throw new RuntimeException("Failed to consume token for client: " + client, e);
         }

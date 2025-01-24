@@ -25,15 +25,11 @@ public class ClientSession {
         this.clientEmail = clientEmail;
         this.issuerEmail = issuerEmail;
 
-        clientService = new ClientService(clientEmail, issuerEmail, connection.getSession());
-    }
-
-    public void selectClientsCards(){
-        clientService.useClientsToken(1);
+        clientService = new ClientService(issuerEmail, connection.getSession());
     }
 
     public void useToken(){
-        clientService.useClientsToken(1);
+        clientService.useClientsToken(issuerEmail, 1);
     }
 
     public void closeConnection() {

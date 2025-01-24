@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ThreadRunner {
-    public static void runInThreads(Runnable task, int numberOfCalls) throws InterruptedException {
+    public static void runInThreads(Runnable task, int numberOfCalls) {
         List<Thread> threads = new ArrayList<>();
 
         for (int i = 0; i < numberOfCalls; i++) {
@@ -14,7 +14,11 @@ public class ThreadRunner {
         }
 
         for (Thread thread : threads) {
-            thread.join();
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }

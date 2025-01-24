@@ -1,4 +1,4 @@
-# Cassandra - Loyality cards
+# Cassandra - Loyalty cards
 -----
 
 

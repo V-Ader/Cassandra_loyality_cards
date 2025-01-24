@@ -8,14 +8,16 @@ import loyalty.database.config.CassandraConfig;
 import loyalty.database.config.CassandraConfigReader;
 
 import java.io.IOException;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class CassandraRandomConnector {
 
     private CassandraConfig config;
 
+    private int counter;
+
     private CassandraRandomConnector() throws IOException {
         this.config = CassandraConfigReader.getConfig();
+        counter = 0;
     }
 
 
@@ -56,12 +58,14 @@ public class CassandraRandomConnector {
         } catch (Exception e) {
             throw new ConnectionException("Failed to connect to Cassandra: ", e);
         }
-        System.out.printf("connected with: %s : %d\n", address.getAddress(), address.getPort());
+//        System.out.printf("connected with: %s : %d\n", address.getAddress(), address.getPort());
         return connection;
     }
 
-    private static Address getRandomAddress(CassandraConfig config) {
+    private Address getRandomAddress(CassandraConfig config) {
+        this.counter += 1;
+        this.counter %= config.getAddresses().size();
         return config.getAddresses()
-                .get(ThreadLocalRandom.current().nextInt(config.getAddresses().size()));
+                .get(this.counter);
     }
 }

@@ -25,10 +25,6 @@ public class Main {
     }
 
     private static void tryToRun(String issuer, String client){
-        try {
-            ExampleTest.run(issuer, client);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        ExampleTest.run(issuer, client);
     }
 }
