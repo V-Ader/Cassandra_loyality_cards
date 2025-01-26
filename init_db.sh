@@ -39,6 +39,15 @@ CREATE TABLE IF NOT EXISTS tokens_by_issuer_email_and_client_email (
     tokens COUNTER,
     PRIMARY KEY ((client_email, issuer_email))
 );
+
+CREATE TABLE IF NOT EXISTS logs_by_issuer_email_and_client_email (
+    issuer_email TEXT,
+    client_email TEXT,
+    change_timestamp TIMESTAMP,
+    previous_value INT,
+    new_value INT,
+    PRIMARY KEY ((owner_email, issuer_email), change_timestamp)
+);
 "
 
 echo "Database setup completed successfully."

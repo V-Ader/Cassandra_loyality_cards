@@ -7,7 +7,11 @@ import com.datastax.oss.driver.api.core.cql.PreparedStatement;
 import com.datastax.oss.driver.api.core.cql.ResultSet;
 import com.datastax.oss.driver.api.core.cql.Row;
 import com.datastax.oss.driver.api.core.metadata.Node;
+import loyalty.actors.issuer.IssuerService;
 import loyalty.database.config.CassandraConnectionConfig;
+import loyalty.models.Token;
+
+import java.time.Instant;
 
 public class TokensTable {
 
@@ -31,8 +35,6 @@ public class TokensTable {
         ExecutionInfo executionInfo = resultSet.getExecutionInfo();
         Node queriedNode = executionInfo.getCoordinator();
         assert queriedNode != null;
-//        System.out.println("Query 'getTokenValue' executed on node: " + queriedNode.getEndPoint());
-
 
         long value = 0;
 
@@ -44,11 +46,15 @@ public class TokensTable {
     }
 
     public static boolean useClientsToken(CqlSession session, CassandraConnectionConfig config, String issuer, String client, long value){
+        if ("INVALID".equals(CardByIssuerTable.getCard(session, config, issuer, client).getStatus())) {
+            return false;
+        }
         long current = getTokenValue(session, config, issuer, client);
         if ( current < value) {
             return false;
         }
         reduceTokens(session, config, issuer, client, value);
+        LogsByIssuerTable.addLog(session, config, issuer, client, Instant.now(), current, current + value);
 
 //        current = getTokenValue(session, config, issuer, client);
 //        if ( current < 0) {
@@ -67,12 +73,6 @@ public class TokensTable {
         boundStatement = boundStatement.setConsistencyLevel(config.getWriteConsistency());
 
         ResultSet resultSet = session.execute(boundStatement);
-
-        // Retrieve the node that processed the query
-        ExecutionInfo executionInfo = resultSet.getExecutionInfo();
-        Node queriedNode = executionInfo.getCoordinator();
-
-        // Print the node's address
-        assert queriedNode != null;
+        resultSet.getExecutionInfo();
     }
 }

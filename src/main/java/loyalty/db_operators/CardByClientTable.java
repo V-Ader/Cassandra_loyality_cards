@@ -17,7 +17,7 @@ public class CardByClientTable {
 
         PreparedStatement preparedStatement = session.prepare(query);
         BoundStatement boundStatement = preparedStatement.bind(clientEmail);
-        boundStatement.setConsistencyLevel(config.getReadConsistency());
+        boundStatement = boundStatement.setConsistencyLevel(config.getReadConsistency());
         ResultSet resultSet = session.execute(boundStatement);
 
         List<CardDTO> cards = new LinkedList<>();
@@ -40,7 +40,7 @@ public class CardByClientTable {
 
         PreparedStatement preparedStatement = session.prepare(query);
         BoundStatement boundStatement = preparedStatement.bind(client, issuer, status);
-        boundStatement.setConsistencyLevel(config.getWriteConsistency());
+        boundStatement = boundStatement.setConsistencyLevel(config.getWriteConsistency());
         session.execute(boundStatement);
     }
 
@@ -48,7 +48,7 @@ public class CardByClientTable {
         String query = "UPDATE card_by_client_email_and_issuer_email SET status = ? WHERE issuer_email = ? AND client_email = ?";
         PreparedStatement preparedStatement = session.prepare(query);
         BoundStatement boundStatement = preparedStatement.bind(newStatus, issuer, client);
-        boundStatement.setConsistencyLevel(config.getReadConsistency());
+        boundStatement = boundStatement.setConsistencyLevel(config.getReadConsistency());
         session.execute(boundStatement);
     }
 
