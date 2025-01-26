@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CassandraCommonConnector {
     private CassandraConfig config;
@@ -44,21 +45,33 @@ public class CassandraCommonConnector {
         } catch (Exception e) {
             throw new ConnectionException("Connection parameters not specified: ", e);
         }
-//
-//        DriverConfigLoader loader = DriverConfigLoader.programmaticBuilder()
-//                .withString(DefaultDriverOption.LOAD_BALANCING_POLICY, "loyalty.database.balancing_policies.RandomLoadBalancingPolicy")
-//                .withString(DefaultDriverOption.LOAD_BALANCING_LOCAL_DATACENTER, "datacenter1")
-//                .build();
-
+        for(Address address : config.getAddresses()) {
+            System.out.printf("%s:%s", address.getAddress(), address.getPort());
+        }
         return CqlSession.builder()
                 .addContactPoints(convertAddresses(config.getAddresses()))
+                .withConfigLoader(DriverConfigLoader.programmaticBuilder()
+                    .withDuration(DefaultDriverOption.REQUEST_TIMEOUT, java.time.Duration.ofSeconds(100)) // Increase timeout to 10 seconds
+                    .build())
                 .withLocalDatacenter("datacenter1")
-//                .withConfigLoader(loader)
+                .withKeyspace(config.getKeyspace())
+                .build();
+    }
+
+    public CqlSession connect(int id) throws ConnectionException {
+        try {
+            this.config = CassandraConfigReader.getConfig();
+        } catch (Exception e) {
+            throw new ConnectionException("Connection parameters not specified: ", e);
+        }
+        return CqlSession.builder()
+                .addContactPoint(new InetSocketAddress(config.getAddresses().get(id).getAddress(), config.getAddresses().get(id).getPort()))
+                .withLocalDatacenter("datacenter1")
                 .withKeyspace(config.getKeyspace())
                 .build();
     }
 
     private Collection<InetSocketAddress> convertAddresses(List<Address> addresses) {
-        return addresses.stream().map(address -> new InetSocketAddress(address.getAddress(), address.getPort())).toList();
+        return addresses.stream().map(address -> new InetSocketAddress(address.getAddress(), address.getPort())).collect(Collectors.toList());
     }
 }

@@ -6,40 +6,60 @@ import loyalty.actors.issuer.IssuerService;
 import loyalty.database.config.CassandraConnectionConfig;
 import loyalty.models.CardDTO;
 
+import java.util.List;
+
 
 public class ExampleTest {
 
-    CqlSession session;
+    List<CqlSession> sessions;
 
-    ExampleTest(CqlSession session) {
-        this.session = session;
+    int counter = 0;
+
+    synchronized int getCounter(){
+        counter += 1;
+        return counter;
     }
 
-    boolean run(String issuer, String client) {
+    ExampleTest(List<CqlSession> sessions) {
+        this.sessions = sessions;
+    }
+
+    BenchmarkResult run(String issuer, String client) {
         int calls = 10;
-        long tokens = 10;
-        long expectedValue = 0;
+        long tokens = 5;
+
+        BenchmarkResult result = new BenchmarkResult();
 
         createCard(client, issuer, tokens);
-        ThreadRunner.runInThreads(() -> useCard(client, issuer), calls);
+        long startTime = System.nanoTime();
+        ThreadRunner.runInThreads(() -> result.updateResults(useCard(client, issuer)), calls);
+        long endTime = System.nanoTime();
         CardDTO card = getCard(client, issuer);
-
-        return card.getTokens() == expectedValue;
+        System.out.println(card.getTokens());
+        result.setDuration((endTime - startTime) / 1_000_000); // in milis
+        return result;
     }
 
 
     private CardDTO getCard(String client, String issuer) {
-        IssuerService service = new IssuerService(issuer, session, CassandraConnectionConfig.getConsistencyOne());
+        IssuerService service = new IssuerService(issuer, getSession(), CassandraConnectionConfig.getDefault());
         return service.getCard(client);
     }
 
     private void createCard(String client, String issuer, long tokens) {
-        IssuerService service = new IssuerService(issuer, session, CassandraConnectionConfig.getDefault());
+        IssuerService service = new IssuerService(issuer, getSession(), CassandraConnectionConfig.getDefault());
         service.createCard(client,tokens);
     }
 
-    private void useCard(String client, String issuer) {
-        ClientService service = new ClientService(client, session, CassandraConnectionConfig.getConsistencyOne());
-        service.useClientsToken(issuer, 1);
+    private boolean useCard(String client, String issuer) {
+//        try{
+//            Thread.sleep(100);
+//        } catch (InterruptedException ignored) {}
+        ClientService service = new ClientService(client, getSession(), CassandraConnectionConfig.getDefault());
+        return service.useClientsToken(issuer, 1);
+    }
+
+    private CqlSession getSession(){
+        return sessions.get(getCounter() % this.sessions.size());
     }
 }

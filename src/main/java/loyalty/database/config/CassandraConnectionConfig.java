@@ -1,6 +1,6 @@
 package loyalty.database.config;
 
-import com.datastax.oss.driver.api.core.ConsistencyLevel;
+import com.datastax.oss.driver.api.core.DefaultConsistencyLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,20 +10,27 @@ import lombok.Setter;
 @Setter
 @Builder
 public class CassandraConnectionConfig {
-    ConsistencyLevel writeConsistency;
-    ConsistencyLevel readConsistency;
+    DefaultConsistencyLevel writeConsistency;
+    DefaultConsistencyLevel readConsistency;
 
     public static CassandraConnectionConfig getDefault(){
         return CassandraConnectionConfig.builder()
-                .writeConsistency(ConsistencyLevel.QUORUM)
-                .readConsistency(ConsistencyLevel.QUORUM)
+                .writeConsistency(DefaultConsistencyLevel.ONE)
+                .readConsistency(DefaultConsistencyLevel.ONE)
+                .build();
+    }
+
+    public static CassandraConnectionConfig getQUORUM(){
+        return CassandraConnectionConfig.builder()
+                .writeConsistency(DefaultConsistencyLevel.QUORUM)
+                .readConsistency(DefaultConsistencyLevel.QUORUM)
                 .build();
     }
 
     public static CassandraConnectionConfig getConsistencyOne(){
         return CassandraConnectionConfig.builder()
-                .writeConsistency(ConsistencyLevel.ONE)
-                .readConsistency(ConsistencyLevel.ONE)
+                .writeConsistency(DefaultConsistencyLevel.ONE)
+                .readConsistency(DefaultConsistencyLevel.ONE)
                 .build();
     }
 }

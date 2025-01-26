@@ -29,7 +29,7 @@ public class ClientService {
         return CardByClientTable.getCards(session, config, clientEmail);
     }
 
-    public void useClientsToken(String issuerEmail, long value){
-        TokensTable.useClientsToken(session, config, issuerEmail, clientEmail, value);
+    public boolean useClientsToken(String issuerEmail, long value){
+        return TokensTable.useClientsToken(session, config, issuerEmail, clientEmail, value);
     }
 }
