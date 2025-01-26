@@ -15,6 +15,16 @@ import java.time.Instant;
 
 public class TokensTable {
 
+    public static void createTokensTable(CqlSession session, CassandraConnectionConfig config) {
+        String query = "CREATE TABLE IF NOT EXISTS tokens_by_issuer_email_and_client_email (issuer_email TEXT, client_email TEXT, tokens COUNTER, PRIMARY KEY ((client_email, issuer_email)));";
+        PreparedStatement preparedStatement = session.prepare(query);
+        BoundStatement boundStatement = preparedStatement.bind();
+        boundStatement = boundStatement.setConsistencyLevel(config.getWriteConsistency());
+        session.execute(boundStatement);
+        System.out.println("TokensTable was created successfully.");
+
+    }
+
     public static void createTokens(CqlSession session, CassandraConnectionConfig config, String issuer, String client, long tokens)  {
         String query = "UPDATE tokens_by_issuer_email_and_client_email SET tokens = tokens + ? WHERE issuer_email = ? AND client_email = ?";
 

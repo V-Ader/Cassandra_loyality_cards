@@ -12,6 +12,21 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class CardByClientTable {
+
+    public static void createCardByClientTable(CqlSession session, CassandraConnectionConfig config) {
+        String query = "CREATE TABLE IF NOT EXISTS card_by_client_email_and_issuer_email (\n" +
+                "    client_email TEXT,\n" +
+                "    issuer_email TEXT,\n" +
+                "    status TEXT,\n" +
+                "    PRIMARY KEY (client_email, issuer_email)\n" +
+                ");";
+        PreparedStatement preparedStatement = session.prepare(query);
+        BoundStatement boundStatement = preparedStatement.bind();
+        boundStatement = boundStatement.setConsistencyLevel(config.getWriteConsistency());
+        session.execute(boundStatement);
+        System.out.println("CardByClientTable was created successfully.");
+    }
+
     public static List<CardDTO> getCards(CqlSession session, CassandraConnectionConfig config, String clientEmail){
         String query = "SELECT client_email, issuer_email, status FROM card_by_client_email_and_issuer_email WHERE client_email = ?;";
 

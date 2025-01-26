@@ -13,6 +13,21 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class CardByIssuerTable {
+
+    public static void createCardByIssuerTable(CqlSession session, CassandraConnectionConfig config) {
+        String query = "CREATE TABLE IF NOT EXISTS card_by_issuer_email_and_client_email (\n" +
+                "    issuer_email TEXT,\n" +
+                "    client_email TEXT,\n" +
+                "    status TEXT,\n" +
+                "    PRIMARY KEY (issuer_email, client_email)\n" +
+                ");";
+        PreparedStatement preparedStatement = session.prepare(query);
+        BoundStatement boundStatement = preparedStatement.bind();
+        boundStatement = boundStatement.setConsistencyLevel(config.getWriteConsistency());
+        session.execute(boundStatement);
+        System.out.println("CardByIssuerTable was created successfully.");
+    }
+
     public static List<CardDTO> getCards(CqlSession session, CassandraConnectionConfig config, String issuer){
         String query = "SELECT client_email, issuer_email, status FROM card_by_issuer_email_and_client_email WHERE issuer_email = ?;";
 

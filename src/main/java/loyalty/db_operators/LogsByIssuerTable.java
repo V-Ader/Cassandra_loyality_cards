@@ -19,6 +19,23 @@ import java.util.Set;
 
 public class LogsByIssuerTable {
 
+    public static void createLogsByIssuerTable(CqlSession session, CassandraConnectionConfig config) {
+        String query = "CREATE TABLE IF NOT EXISTS logs_by_issuer_email_and_client_email (\n" +
+                "    issuer_email TEXT,\n" +
+                "    client_email TEXT,\n" +
+                "    change_timestamp TIMESTAMP,\n" +
+                "    previous_value INT,\n" +
+                "    new_value INT,\n" +
+                "    PRIMARY KEY ((client_email, issuer_email), change_timestamp)\n" +
+                ");";
+        PreparedStatement preparedStatement = session.prepare(query);
+        BoundStatement boundStatement = preparedStatement.bind();
+        boundStatement = boundStatement.setConsistencyLevel(config.getWriteConsistency());
+        session.execute(boundStatement);
+        System.out.println("LogsByIssuerTable was created successfully.");
+
+    }
+
     public static List<Log> getLogs(CqlSession session, CassandraConnectionConfig config, String issuerEmail, String clientEmail) {
         String query = "SELECT issuer_email, client_email, change_timestamp, previous_value, new_value " +
                 "FROM logs_by_issuer_email_and_client_email " +
