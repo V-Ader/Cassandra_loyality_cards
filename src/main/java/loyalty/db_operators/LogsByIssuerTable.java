@@ -71,7 +71,7 @@ public class LogsByIssuerTable {
         session.execute(boundStatement);
     }
 
-    public static List<Log> getLogsByTotalChange(CqlSession session, String issuer, String client, int totalChange) {
+    public static List<Log> getLogsByTotalChange(CqlSession session, String issuer, String client, long totalChange) {
         String query = "SELECT issuer_email, client_email, change_timestamp, previous_value, new_value " +
                 "FROM logs_by_issuer_email_and_client_email WHERE issuer_email = ? AND client_email = ?";
 
