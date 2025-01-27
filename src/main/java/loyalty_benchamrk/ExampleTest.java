@@ -32,7 +32,7 @@ public class ExampleTest {
 
         createCard(client, issuer, tokens);
         long startTime = System.nanoTime();
-        ThreadRunner.runInThreads(() -> result.updateResults(useCard(client, issuer)), calls);
+        ThreadRunner.runInThreads(() -> result.updateResults(useCard(client, issuer)), calls, 0);
         long endTime = System.nanoTime();
         CardDTO card = getCard(client, issuer);
         System.out.println(card.getTokens());

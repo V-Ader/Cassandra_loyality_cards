@@ -64,13 +64,7 @@ public class TokensTable {
             return false;
         }
         reduceTokens(session, config, issuer, client, value);
-        LogsByIssuerTable.addLog(session, config, issuer, client, Instant.now(), current, current + value);
-
-//        current = getTokenValue(session, config, issuer, client);
-//        if ( current < 0) {
-//            reduceTokens(session, config, issuer, client, -value);
-//            return false;
-//        }
+        LogsByIssuerTable.addLog(session, config, issuer, client, Instant.now(), (int) ((int) current + value), (int) current);
 
         return true;
     }

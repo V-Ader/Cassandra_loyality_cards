@@ -33,4 +33,11 @@ public class CassandraConnectionConfig {
                 .readConsistency(DefaultConsistencyLevel.ONE)
                 .build();
     }
+
+    public static CassandraConnectionConfig getConsistencyAll() {
+        return CassandraConnectionConfig.builder()
+                .writeConsistency(DefaultConsistencyLevel.ALL)
+                .readConsistency(DefaultConsistencyLevel.ALL)
+                .build();
+    }
 }

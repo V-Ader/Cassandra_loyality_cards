@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS logs_by_issuer_email_and_client_email (
     change_timestamp TIMESTAMP,
     previous_value INT,
     new_value INT,
-    PRIMARY KEY ((owner_email, issuer_email), change_timestamp)
+    PRIMARY KEY ((issuer_email, client_email), change_timestamp)
 );
 "
 

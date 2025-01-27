@@ -77,7 +77,7 @@ public class LogsByIssuerTable {
         return cards;
     }
 
-    public static void addLog(CqlSession session, CassandraConnectionConfig config, String issuerEmail, String clientEmail, Instant changeTimestamp, long previousValue, long newValue) {
+    public static void addLog(CqlSession session, CassandraConnectionConfig config, String issuerEmail, String clientEmail, Instant changeTimestamp, int previousValue, int newValue) {
         String query = "INSERT INTO logs_by_issuer_email_and_client_email " +
                 "(issuer_email, client_email, change_timestamp, previous_value, new_value) " +
                 "VALUES (?, ?, ?, ?, ?) USING TTL 300"; // 5 minutes
@@ -88,9 +88,10 @@ public class LogsByIssuerTable {
         session.execute(boundStatement);
     }
 
-    public static List<Log> getLogsByTotalChange(CqlSession session, String issuer, String client, long totalChange) {
+    public static List<Log> getLogsByTotalChange(CqlSession session, String issuer, String client, int totalChange) {
         String query = "SELECT issuer_email, client_email, change_timestamp, previous_value, new_value " +
-                "FROM logs_by_issuer_email_and_client_email WHERE issuer_email = ? AND client_email = ?";
+                "FROM logs_by_issuer_email_and_client_email WHERE issuer_email = ? AND client_email = ? " +
+                "ORDER BY change_timestamp DESC";
 
         PreparedStatement preparedStatement = session.prepare(query);
         BoundStatement boundStatement = preparedStatement.bind(issuer, client);
@@ -98,19 +99,24 @@ public class LogsByIssuerTable {
         ResultSet resultSet = session.execute(boundStatement);
 
         List<Log> matchingLogs = new LinkedList<>();
+        int loggedValue = 0;
 
         for (Row row : resultSet) {
             int previousValue = row.getInt("previous_value");
             int newValue = row.getInt("new_value");
-            if (Math.abs(newValue - previousValue) == totalChange) {
-                Log logDTO = Log.builder()
-                        .issuerEmail(row.getString("issuer_email"))
-                        .clientEmail(row.getString("client_email"))
-                        .changeTimestamp(row.getInstant("change_timestamp"))
-                        .previousValue(previousValue)
-                        .newValue(newValue)
-                        .build();
-                matchingLogs.add(logDTO);
+
+            Log logDTO = Log.builder()
+                    .issuerEmail(row.getString("issuer_email"))
+                    .clientEmail(row.getString("client_email"))
+                    .changeTimestamp(row.getInstant("change_timestamp"))
+                    .previousValue(previousValue)
+                    .newValue(newValue)
+                    .build();
+            matchingLogs.add(logDTO);
+            loggedValue += Math.abs(newValue - previousValue);
+
+            if (loggedValue >= totalChange) {
+                break;
             }
         }
 

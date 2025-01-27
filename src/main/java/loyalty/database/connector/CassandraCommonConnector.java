@@ -3,7 +3,6 @@ package loyalty.database.connector;
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.config.DefaultDriverOption;
 import com.datastax.oss.driver.api.core.config.DriverConfigLoader;
-import com.datastax.oss.driver.internal.core.loadbalancing.DcInferringLoadBalancingPolicy;
 import loyalty.database.ConnectionException;
 import loyalty.database.config.Address;
 import loyalty.database.config.CassandraConfig;

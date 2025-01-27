@@ -2,15 +2,20 @@ package loyalty_benchamrk;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import loyalty.database.ConnectionException;
+import loyalty.database.config.CassandraConnectionConfig;
 import loyalty.database.connector.CassandraCommonConnector;
+import loyalty.models.CardId;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Benchmark {
     public static void main(String[] args) throws InterruptedException {
-        List<String> issuers = EmailGenerator.getEmails("issuer-5001", 10);
-        List<String> clients = EmailGenerator.getEmails("client-5001", 10);
+
+//        DBInitializer.initializationDB();
+
+        List<String> issuers = EmailGenerator.getEmails("issuer-80018", 5);
+        List<String> clients = EmailGenerator.getEmails("client-80017", 4);
 
         List<Thread> threads = new ArrayList<>();
         BenchmarkResult finalResult = new BenchmarkResult();
@@ -21,8 +26,8 @@ public class Benchmark {
         for (String issuer : issuers) {
             for (String client : clients) {
                 Thread thread = new Thread(() -> {
-                    ExampleTest test = new ExampleTest(sessions);
-                    finalResult.merge(test.run(issuer, client));
+                    RealScenarioTest test = new RealScenarioTest(sessions);
+                    finalResult.merge(test.runOnConsistencyLevel(new CardId(issuer, client), CassandraConnectionConfig.getConsistencyAll()));
                 });
                 threads.add(thread);
                 thread.start();
@@ -36,9 +41,15 @@ public class Benchmark {
         for (CqlSession session : sessions) {
             session.close();
         }
+        if (finalResult.accepted - finalResult.alerted == finalResult.executions / 2 ) {
+            System.out.println("TEST PASSED");
+        } else {
+            System.out.println("TEST FAILED");
+        }
         System.out.println(finalResult);
         System.out.printf("Avg duration: %d", finalResult.duration / finalResult.executions);
     }
+
 
     private static CqlSession getSession() {
         CassandraCommonConnector connector = CassandraCommonConnector.getInstance();
@@ -61,8 +72,5 @@ public class Benchmark {
         }
         return session;
     }
-
-
-
 }
 

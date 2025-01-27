@@ -2,7 +2,6 @@ package loyalty.actors.client;
 
 
 import com.datastax.oss.driver.api.core.CqlSession;
-import com.datastax.oss.driver.api.core.session.Session;
 import loyalty.db_operators.CardByClientTable;
 import loyalty.db_operators.TokensTable;
 import loyalty.database.config.CassandraConnectionConfig;

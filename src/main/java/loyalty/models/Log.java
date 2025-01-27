@@ -21,7 +21,7 @@ public class Log {
                 ", changeTimestamp=" + changeTimestamp +
                 ", previousValue=" + previousValue +
                 ", newValue=" + newValue +
-                '}';
+                "}\n";
     }
 }
 

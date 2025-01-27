@@ -11,12 +11,15 @@ public class BenchmarkResult {
     public int executions;
     public int accepted;
     public int rejected;
+    public int alerted;
     public long duration;
 
     BenchmarkResult() {
         executions = 0;
         accepted = 0;
         rejected = 0;
+
+        alerted = 0;
         duration = 0;
     }
 
@@ -33,6 +36,7 @@ public class BenchmarkResult {
         executions += result.executions;
         accepted += result.accepted;
         rejected += result.rejected;
+        alerted += result.alerted;
         duration += result.duration;
     }
 
@@ -41,7 +45,8 @@ public class BenchmarkResult {
         return "executions:" + this.executions + '\n' +
                 "accepted:" + this.accepted + '\n' +
                 "rejected:" + this.rejected + '\n' +
-                "duration:" + this.duration + '\n';
+                "alerted:" + this.alerted + '\n' +
+                "duration:" + this.duration + " milliseconds\n";
     }
 
 
