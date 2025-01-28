@@ -1,6 +1,15 @@
 # Cassandra - Loyalty cards
 -----
 
+__Systemy rozproszone i chmurowe__
+
+____Studia drugiego stopnia____
+
+* Beata Zawiślak, nr albumu 145223
+
+* Karol Zawiślak, nr albumu 145303
+
+---
 
 # Założenia
 
@@ -50,7 +59,7 @@ WHERE client_email = ? AND issuer_email = ?;
 Gdy karta jest aktywna, aby jej użyć można wykonać zapytanie:
 ```sql
 UPDATE tokens_by_client_email_and_issuer_email
-SET tokens = tokens - 1
+SET tokens = tokens - n
 WHERE client_email = ? AND issuer_email = ?;
 ```
 
