@@ -11,7 +11,7 @@ public class KeySpace {
         PreparedStatement preparedStatement = session.prepare(query);
         BoundStatement boundStatement = preparedStatement.bind();
         boundStatement = boundStatement.setConsistencyLevel(config.getWriteConsistency());
-        session.execute(boundStatement);
+        QueryExecutionService.execute(session, boundStatement);
         System.out.println("Keyspace loyalty was created successfully.");
 
     }
@@ -21,6 +21,6 @@ public class KeySpace {
         PreparedStatement preparedStatement = session.prepare(query);
         BoundStatement boundStatement = preparedStatement.bind();
         boundStatement = boundStatement.setConsistencyLevel(config.getWriteConsistency());
-        session.execute(boundStatement);
+        QueryExecutionService.execute(session, boundStatement);
     }
 }

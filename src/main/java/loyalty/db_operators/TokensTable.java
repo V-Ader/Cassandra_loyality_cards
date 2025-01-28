@@ -1,5 +1,6 @@
 package loyalty.db_operators;
 
+import com.datastax.oss.driver.api.core.ConsistencyLevel;
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.BoundStatement;
 import com.datastax.oss.driver.api.core.cql.ExecutionInfo;
@@ -20,9 +21,16 @@ public class TokensTable {
         PreparedStatement preparedStatement = session.prepare(query);
         BoundStatement boundStatement = preparedStatement.bind();
         boundStatement = boundStatement.setConsistencyLevel(config.getWriteConsistency());
-        session.execute(boundStatement);
+        QueryExecutionService.execute(session, boundStatement);
         System.out.println("TokensTable was created successfully.");
+    }
 
+    public static void dropTokensTable(CqlSession session) {
+        String query = "DROP TABLE IF EXISTS tokens_by_issuer_email_and_client_email;";
+        PreparedStatement preparedStatement = session.prepare(query);
+        BoundStatement boundStatement = preparedStatement.bind();
+        boundStatement = boundStatement.setConsistencyLevel(ConsistencyLevel.ANY);
+        QueryExecutionService.executeOnFlexibleConsistency(session, boundStatement);
     }
 
     public static void createTokens(CqlSession session, CassandraConnectionConfig config, String issuer, String client, long tokens)  {
@@ -31,7 +39,7 @@ public class TokensTable {
         PreparedStatement preparedStatement = session.prepare(query);
         BoundStatement boundStatement = preparedStatement.bind(tokens, issuer, client);
         boundStatement = boundStatement.setConsistencyLevel(config.getWriteConsistency());
-        session.execute(boundStatement);
+        QueryExecutionService.execute(session, boundStatement);
     }
 
     public static long getTokenValue(CqlSession session, CassandraConnectionConfig config, String issuer, String client) {
@@ -40,7 +48,7 @@ public class TokensTable {
         PreparedStatement preparedStatement = session.prepare(query);
         BoundStatement boundStatement = preparedStatement.bind(issuer, client);
         boundStatement = boundStatement.setConsistencyLevel(config.getReadConsistency());
-        ResultSet resultSet = session.execute(boundStatement);
+        ResultSet resultSet = QueryExecutionService.execute(session, boundStatement);
         // Retrieve the node that processed the query
         ExecutionInfo executionInfo = resultSet.getExecutionInfo();
         Node queriedNode = executionInfo.getCoordinator();
@@ -56,7 +64,7 @@ public class TokensTable {
     }
 
     public static boolean useClientsToken(CqlSession session, CassandraConnectionConfig config, String issuer, String client, long value){
-        if ("INVALID".equals(CardByIssuerTable.getCard(session, config, issuer, client).getStatus())) {
+        if (!"ACTIVE".equals(CardByIssuerTable.getCard(session, config, issuer, client).getStatus())) {
             return false;
         }
         long current = getTokenValue(session, config, issuer, client);
@@ -76,7 +84,7 @@ public class TokensTable {
         BoundStatement boundStatement = preparedStatement.bind(value, issuer, client);
         boundStatement = boundStatement.setConsistencyLevel(config.getWriteConsistency());
 
-        ResultSet resultSet = session.execute(boundStatement);
+        ResultSet resultSet = QueryExecutionService.execute(session, boundStatement);
         resultSet.getExecutionInfo();
     }
 }

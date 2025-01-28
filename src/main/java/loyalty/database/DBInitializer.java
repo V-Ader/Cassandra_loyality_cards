@@ -20,9 +20,13 @@ public class DBInitializer {
         CassandraConnectionConfig config = CassandraConnectionConfig.getQUORUM();
         KeySpace.createKeySpace(initSession, config);
         KeySpace.useKeySpace(initSession, config);
+        CardByClientTable.dropCardByClientTable(initSession);
         CardByClientTable.createCardByClientTable(initSession, config);
+        CardByIssuerTable.dropCardByClientTable(initSession);
         CardByIssuerTable.createCardByIssuerTable(initSession, config);
+        TokensTable.dropTokensTable(initSession);
         TokensTable.createTokensTable(initSession, config);
+        LogsByIssuerTable.dropLogsByIssuerTable(initSession);
         LogsByIssuerTable.createLogsByIssuerTable(initSession, config);
 
         initSession.close();

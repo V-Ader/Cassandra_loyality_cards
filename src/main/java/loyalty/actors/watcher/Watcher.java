@@ -28,6 +28,10 @@ public class Watcher {
                 List<Log> invalidOperations = LogsByIssuerTable.getLogsByTotalChange(session, cardId.getIssuerEmail(), cardId.getClientEmail(), (int) Math.abs(tokenValue));
                 sendAlert(cardId.getIssuerEmail(), cardId.getClientEmail(), invalidOperations);
                 results.add(new WatcherInspectionResult(new CardId(cardId.getIssuerEmail(), cardId.getClientEmail()), tokenValue, invalidOperations));
+
+                for (Log log : invalidOperations) {
+                    LogsByIssuerTable.deleteLog(session, config, log.getIssuerEmail(), log.getClientEmail(), log.getChangeTimestamp());
+                }
             } else if (tokenValue == 0) { // set to inactive
                 CardByIssuerTable.setStatus(session, config, cardId.getIssuerEmail(), cardId.getClientEmail(), "INACTIVE");
                 CardByClientTable.setStatus(session, config, cardId.getClientEmail(), cardId.getIssuerEmail(), "INACTIVE");

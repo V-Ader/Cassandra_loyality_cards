@@ -2,6 +2,7 @@ package loyalty_benchamrk;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import loyalty.database.ConnectionException;
+import loyalty.database.DBInitializer;
 import loyalty.database.config.CassandraConnectionConfig;
 import loyalty.database.connector.CassandraCommonConnector;
 import loyalty.models.CardId;
@@ -12,10 +13,10 @@ import java.util.List;
 public class Benchmark {
     public static void main(String[] args) throws InterruptedException {
 
-//        DBInitializer.initializationDB();
+        DBInitializer.initializationDB();
 
-        List<String> issuers = EmailGenerator.getEmails("issuer-80018", 5);
-        List<String> clients = EmailGenerator.getEmails("client-80017", 4);
+        List<String> issuers = EmailGenerator.getEmails("issuer-80020", 5);
+        List<String> clients = EmailGenerator.getEmails("client-80020", 4);
 
         List<Thread> threads = new ArrayList<>();
         BenchmarkResult finalResult = new BenchmarkResult();
@@ -27,7 +28,7 @@ public class Benchmark {
             for (String client : clients) {
                 Thread thread = new Thread(() -> {
                     RealScenarioTest test = new RealScenarioTest(sessions);
-                    finalResult.merge(test.runOnConsistencyLevel(new CardId(issuer, client), CassandraConnectionConfig.getConsistencyAll()));
+                    finalResult.merge(test.runOnConsistencyLevel(new CardId(issuer, client), CassandraConnectionConfig.getConsistencyOne()));
                 });
                 threads.add(thread);
                 thread.start();
@@ -41,6 +42,7 @@ public class Benchmark {
         for (CqlSession session : sessions) {
             session.close();
         }
+
         if (finalResult.accepted - finalResult.alerted == finalResult.executions / 2 ) {
             System.out.println("TEST PASSED");
         } else {

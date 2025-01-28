@@ -31,9 +31,13 @@ public class LogsByIssuerTable {
         PreparedStatement preparedStatement = session.prepare(query);
         BoundStatement boundStatement = preparedStatement.bind();
         boundStatement = boundStatement.setConsistencyLevel(config.getWriteConsistency());
-        session.execute(boundStatement);
+        QueryExecutionService.execute(session, boundStatement);
         System.out.println("LogsByIssuerTable was created successfully.");
+    }
 
+    public static void dropLogsByIssuerTable(CqlSession session) {
+        String query = "DROP TABLE IF EXISTS logs_by_issuer_email_and_client_email;";
+        session.execute(query);
     }
 
     public static List<Log> getLogs(CqlSession session, CassandraConnectionConfig config, String issuerEmail, String clientEmail) {
@@ -44,7 +48,7 @@ public class LogsByIssuerTable {
         PreparedStatement preparedStatement = session.prepare(query);
         BoundStatement boundStatement = preparedStatement.bind(issuerEmail, clientEmail);
         boundStatement = boundStatement.setConsistencyLevel(config.getReadConsistency());
-        ResultSet resultSet = session.execute(boundStatement);
+        ResultSet resultSet = QueryExecutionService.execute(session, boundStatement);
 
         List<Log> logs = new LinkedList<>();
 
@@ -61,6 +65,20 @@ public class LogsByIssuerTable {
         return logs;
     }
 
+    public static void deleteLog(CqlSession session, CassandraConnectionConfig config, String issuerEmail, String clientEmail, Instant changeTimestamp) {
+        // Define the DELETE query with parameters
+        String query = "DELETE FROM logs_by_issuer_email_and_client_email " +
+                "WHERE issuer_email = ? AND client_email = ? AND change_timestamp = ?";
+
+        // Prepare the statement
+        PreparedStatement preparedStatement = session.prepare(query);
+        BoundStatement boundStatement = preparedStatement.bind(issuerEmail, clientEmail, changeTimestamp);
+        boundStatement = boundStatement.setConsistencyLevel(config.getWriteConsistency());
+
+        QueryExecutionService.execute(session, boundStatement);
+    }
+
+
     public static Set<CardId> getAllLoggedCards(CqlSession session, CassandraConnectionConfig config) {
         String query = "SELECT issuer_email, client_email, change_timestamp, previous_value, new_value " +
                 "FROM logs_by_issuer_email_and_client_email";
@@ -68,7 +86,7 @@ public class LogsByIssuerTable {
         PreparedStatement preparedStatement = session.prepare(query);
         BoundStatement boundStatement = preparedStatement.bind();
         boundStatement = boundStatement.setConsistencyLevel(config.getReadConsistency());
-        ResultSet resultSet = session.execute(boundStatement);
+        ResultSet resultSet = QueryExecutionService.executeOnFlexibleConsistency(session, boundStatement);
 
         Set<CardId> cards = new HashSet<>();
         for (Row row : resultSet) {
@@ -85,7 +103,7 @@ public class LogsByIssuerTable {
         PreparedStatement preparedStatement = session.prepare(query);
         BoundStatement boundStatement = preparedStatement.bind(issuerEmail, clientEmail, changeTimestamp, previousValue, newValue);
         boundStatement = boundStatement.setConsistencyLevel(config.getWriteConsistency());
-        session.execute(boundStatement);
+        QueryExecutionService.execute(session, boundStatement);
     }
 
     public static List<Log> getLogsByTotalChange(CqlSession session, String issuer, String client, int totalChange) {
@@ -96,7 +114,7 @@ public class LogsByIssuerTable {
         PreparedStatement preparedStatement = session.prepare(query);
         BoundStatement boundStatement = preparedStatement.bind(issuer, client);
         boundStatement = boundStatement.setConsistencyLevel(DefaultConsistencyLevel.ALL);
-        ResultSet resultSet = session.execute(boundStatement);
+        ResultSet resultSet = QueryExecutionService.execute(session, boundStatement);
 
         List<Log> matchingLogs = new LinkedList<>();
         int loggedValue = 0;
