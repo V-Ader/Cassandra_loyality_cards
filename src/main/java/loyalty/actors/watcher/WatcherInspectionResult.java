@@ -18,4 +18,8 @@ public class WatcherInspectionResult {
     private CardId cardId;
     private long invalidValue;
     private List<Log> reportedLogs;
+
+    public void addLogs(List<Log> newLogs){
+        this.reportedLogs.addAll(newLogs);
+    }
 }

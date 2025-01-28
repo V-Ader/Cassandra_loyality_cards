@@ -15,8 +15,8 @@ public class Benchmark {
 
         DBInitializer.initializationDB();
 
-        List<String> issuers = EmailGenerator.getEmails("issuer-80020", 5);
-        List<String> clients = EmailGenerator.getEmails("client-80020", 4);
+        List<String> issuers = EmailGenerator.getEmails("issuer-80021", 5);
+        List<String> clients = EmailGenerator.getEmails("client-80021", 4);
 
         List<Thread> threads = new ArrayList<>();
         BenchmarkResult finalResult = new BenchmarkResult();
@@ -28,7 +28,7 @@ public class Benchmark {
             for (String client : clients) {
                 Thread thread = new Thread(() -> {
                     RealScenarioTest test = new RealScenarioTest(sessions);
-                    finalResult.merge(test.runOnConsistencyLevel(new CardId(issuer, client), CassandraConnectionConfig.getConsistencyOne()));
+                    finalResult.merge(test.runOnConsistencyLevel(new CardId(issuer, client), CassandraConnectionConfig.getQUORUM()));
                 });
                 threads.add(thread);
                 thread.start();

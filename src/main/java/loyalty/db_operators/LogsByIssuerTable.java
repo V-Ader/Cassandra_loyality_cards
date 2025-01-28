@@ -1,6 +1,7 @@
 package loyalty.db_operators;
 
 
+import com.datastax.oss.driver.api.core.ConsistencyLevel;
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.DefaultConsistencyLevel;
 import com.datastax.oss.driver.api.core.cql.BoundStatement;
@@ -37,7 +38,10 @@ public class LogsByIssuerTable {
 
     public static void dropLogsByIssuerTable(CqlSession session) {
         String query = "DROP TABLE IF EXISTS logs_by_issuer_email_and_client_email;";
-        session.execute(query);
+        PreparedStatement preparedStatement = session.prepare(query);
+        BoundStatement boundStatement = preparedStatement.bind();
+        boundStatement = boundStatement.setConsistencyLevel(ConsistencyLevel.ANY);
+        QueryExecutionService.executeOnFlexibleConsistency(session, boundStatement);
     }
 
     public static List<Log> getLogs(CqlSession session, CassandraConnectionConfig config, String issuerEmail, String clientEmail) {

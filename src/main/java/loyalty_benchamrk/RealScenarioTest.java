@@ -39,13 +39,15 @@ public class RealScenarioTest {
         ThreadRunner.runInThreads(() -> result.updateResults(useCard(cardId, config)), calls, delay);
         long endTime = System.nanoTime();
 
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+        WatcherInspectionResult inspectionResults = Watcher.inspect(getSession(), config).stream().filter(watcherInspectionResult -> watcherInspectionResult.getCardId().equals(cardId)).findFirst().orElse(new WatcherInspectionResult(cardId, 0, new ArrayList<>()));
+
+        for(int watcherIteration = 0; result.getAccepted() - inspectionResults.getReportedLogs().size() != calls / 2 && watcherIteration < 5; watcherIteration += 1){
+            System.out.printf("Watcher reRun: detected: %d of %d\n", inspectionResults.getReportedLogs().size(), result.getAccepted() - calls / 2);
+            System.out.printf("Watcher reRun %d\n", watcherIteration);
+            WatcherInspectionResult secondInspection = Watcher.inspect(getSession(), config).stream().filter(watcherInspectionResult -> watcherInspectionResult.getCardId().equals(cardId)).findFirst().orElse(new WatcherInspectionResult(cardId, 0, new ArrayList<>()));
+            inspectionResults.addLogs(secondInspection.getReportedLogs());
         }
 
-        WatcherInspectionResult inspectionResults = Watcher.inspect(getSession(), config).stream().filter(watcherInspectionResult -> watcherInspectionResult.getCardId().equals(cardId)).findFirst().orElse(new WatcherInspectionResult(cardId, 0, new ArrayList<>()));
         result.setAlerted(inspectionResults.getReportedLogs().size());
         result.setDuration(((endTime - startTime) / 1_000_000) - delay*calls); // in milis
         return result;
