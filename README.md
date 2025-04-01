@@ -1,62 +1,51 @@
 # Cassandra - Loyalty cards
 -----
 
-__Systemy rozproszone i chmurowe__
+# Assumptions
 
-____Studia drugiego stopnia____
-
-* Beata Zawiślak, nr albumu 145223
-
-* Karol Zawiślak, nr albumu 145303
-
----
-
-# Założenia
-
-1. Każdy klient może mieć wiele kart różnych wystawców.
-2. Każdy wystawca może mieć wiele klientów.
-3. Jeden klient może mieć tylko jedną kartę od danego wystawcy.
-4. Każda karta ma wartość, która zmniejsza się po każdym użyciu.
-5. Gdy karta ma osiągnąć wartość 0 staje się nie ważna.
+1. Each customer can have multiple cards from different issuers..
+2. Each issuer can have multiple customers.
+3. A customer can have only one card from a given issuer.
+4. Each card has a value that decreases after each use.
+5. When a card reaches a value of 0, it becomes invalid.
 
 
-# Przykładowe zapytania
+# Sample Queries
 
-## Użytkownik
+## User
 
-Jako użytkownik, chcę widzieć swoje karty:
+As a user, I want to see my cards
 ```sql
 SELECT client_email, issuer_email, status
 FROM card_by_client_email_and_issuer_email
 WHERE client_email = ? AND issuer_email = ?;
 ```
 
-Oraz sprawdzić ich wartości:
+And check their values:
 ```sql
 SELECT tokens
 FROM tokens_by_issuer_email_and_client_email
 WHERE client_email = ? AND issuer_email = ?;
 ```
 
-## Wystawca
+## Issuer
 
-Jako wystawca, chcę widzieć karty wystawione:
+As an issuer, I want to see the issued cards:
 ```sql
 SELECT issuer_email, client_email, status
 FROM card_by_issuer_email_and_client_email
 WHERE client_email = ? AND issuer_email = ?;
 ```
 
-## Zarządzanie kartą 
-
-Wartość karty można sprawdzić zapytaniem:
+## Card Management 
+The card value can be checked with the following query:
 ```sql
 SELECT tokens
 FROM tokens_by_client_email_and_issuer_email
 WHERE client_email = ? AND issuer_email = ?;
 ```
 
-Gdy karta jest aktywna, aby jej użyć można wykonać zapytanie:
+If the card is active, it can be used with the following query:
 ```sql
 UPDATE tokens_by_client_email_and_issuer_email
 SET tokens = tokens - n
@@ -64,7 +53,7 @@ WHERE client_email = ? AND issuer_email = ?;
 ```
 
 
-### Tabele
+### Tables
 
 ```sql
 CREATE TABLE card_by_client_email_and_issuer_email (
@@ -103,35 +92,38 @@ CREATE TABLE logs_by_issuer_email_and_ (
 );
 ```
 
-# Poprawność
+# Consistency
 
-Poprawność ma być zapewniona poprzez dodatkowego użytkownika: WATCHER
+Consistency is ensured through an additional user: WATCHER
 
-Zasada działania `WATCHERA`:
-1. Pobierz wszystkie liczniki, których wartość jest <= 0. 
-   1. Dla kart, których wartość równa 0 -> ustaw status odpowiadającej karty na `INACTIVE`.
-   2. Dla kart, których wartość jest mniejsza niż 0 -> ustaw status odpowiadającej karty na `INVALID`.
+WATCHER's operation principle:
+1. Retrieve all counters with a value of ≤ 0.. 
+   1. For cards with a value of 0 → set the corresponding card status to `INACTIVE`
+   2. For cards with a value less than 0 → set the corresponding card status to `INVALID`.
 
-__Rezultat__:
-1. Brak race condition -> istnieje 1 WATCHER. W przypadku większego zapotrzebowania można ich utworzyć więcej z podziałem na np. wystawców.
-2. Ostateczna poprawność wartości statusu kart. Gdy wystawca ostatecznie pobierze swoje wystawione karty, będzie widział, czy jest któraś w stanie `INVALID` i będzie mógł podjąć decyzję biznesową wobec danego klienta.
+Outcome:
+1. No race conditions → only one `WATCHER` exists. If more capacity is needed, additional WATCHER instances can be created, e.g., per issuer.
+2. Ultimate correctness of card status values. When an issuer retrieves their issued cards, they will see if any are in the INVALID state and can take appropriate business actions regarding the customer.
 
-# Stress testy
 
-Stres testy przeprowadziliśmy w następujący sposób: 
-1) Tworzymy `i` issuerów oraz `c` klientów. Seriami jest tworzone `i*c` kart z domyślną wartością 50. 
-2) Tworzymy `n` sesji klienckich, w ramach których będziemy próbowali wykonać operację na karcie. 
-3) Po każdej "dozwolonej" operacji ze strony klienta, jest wstawiany wiersz to tabeli logów notujący informację zawierające takie dane jak:
-   1) adres email klienta używającego karty
-   2) adres email wystawcy
-   3) timestamp operacji
-   4) wartość karty przed jej użyciem
-   5) wartość karty po jej użyciu
-4) Po serii operacji uruchamiany jest `WATCHER`, który weryfikuję tabelę z logami sprawdzając czy któraś z operacji była niedozwolona. 
-5) Jeżeli wyszuka niedozwoloną operację, karta przechodzi w stan `INVALID` i wszystkie logi, które były niedozwolone z globalnego punktu widzenia są usuwane. 
-# Testowanie rozwiązania
+# Stress Testing
 
-W celu przetestowania można wykorzystać plik `init_db.sh`.
+Stress tests were conducted as follows:
+ 
+1) Create `i` issuers and c customers. Then, `i * c` cards are created in batches with a default value of 50. 
+2) Create `n` client sessions, in which operations on the cards will be attempted. 
+3)After each "allowed" operation by a client, a log entry is inserted into the logs table containing:
+   1) The email address of the client using the card.
+   2) The email address of the issuer
+   3) The operation timestamp
+   4) The card's value before use
+   5) The card's value after use
+4) After a series of operations, the `WATCHER` is executed, verifying the logs table to check if any operations were unauthorized.
+5) If an unauthorized operation is detected, the card is marked as `INVALID`, and all logs related to invalid transactions are removed.
+   
+# Testing the Solution
+
+To test the solution, you can use the `init_db.sh` script.
 
 ```bash
 docker cp init_db.sh <cassandra_container>:/tmp/init_db.sh
